@@ -40,7 +40,7 @@ class Decensor:
         #self.load_model()
         color_dir = self.args.decensor_input_path
         file_names = os.listdir(color_dir)
-
+        print(file_names)
         #convert all images into np arrays and put them in a list
         for file_name in file_names:
             color_file_path = os.path.join(color_dir, file_name)

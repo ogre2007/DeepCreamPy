@@ -9,7 +9,6 @@ ENV BUILD_PACKAGES="\
         xz-utils \
         zlib1g-dev \
         git \
-        curl \
         unzip" \
     APT_PACKAGES="\
         ca-certificates \
@@ -33,7 +32,6 @@ COPY gd.sh /opt
 WORKDIR /opt
 RUN set -ex; \
     apt-get update -y; \
-    apt-get upgrade -y; \
     apt-get install -y --no-install-recommends ${APT_PACKAGES}; \
     apt-get install -y --no-install-recommends ${BUILD_PACKAGES}; \
     ln -s /usr/bin/idle3 /usr/bin/idle; \
@@ -42,15 +40,17 @@ RUN set -ex; \
     ln -s /usr/bin/python3-config /usr/bin/python-config; \
     ln -s /usr/bin/pip3 /usr/bin/pip; \
     pip install -U -v setuptools wheel; \
-    cd /opt && \
-    git clone https://github.com/deeppomf/DeepCreamPy.git && \
+    pip install gdown; \
+    cd /opt;
+RUN git clone https://github.com/liaoxiong3x/DeepCreamPy.git && \
     cd /opt/DeepCreamPy && \
     pip install -U -v -r requirements.txt && \
     mkdir -p models/ && \
-    bash /opt/gd.sh ${MODELS}; \
+    gdown --id ${MODELS} -O model.zip; \
     unzip model.zip && \
     mv model.h5 models && \
-    apt-get remove --purge --auto-remove -y ${BUILD_PACKAGES}; \
+    rm model.zip;
+RUN apt-get remove --purge --auto-remove -y ${BUILD_PACKAGES}; \
     apt-get clean; \
     apt-get autoclean; \
     apt-get autoremove; \
@@ -62,7 +62,7 @@ RUN set -ex; \
     find /usr/lib/python3 -name __pycache__ | xargs rm -r; \
     rm -rf /root/.[acpw]*;
 
-VOLUME [ "/opt/DeepCreamPy/decensor_input", "/opt/DeepCreamPy/decensor_output" ]
+VOLUME [ "/opt/DeepCreamPy/decensor_input", "/opt/DeepCreamPy/decensor_output", "/opt/DeepCreamPy/decensor_input_original" ]
 
 WORKDIR /opt/DeepCreamPy
 ENTRYPOINT [ "/usr/bin/python", "/opt/DeepCreamPy/decensor.py" ]
